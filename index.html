@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>麻雀　点数計算アプリ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <h1>麻雀　点数計算</h1>
+    <p>牌を選択して正確な点数を計算</p>
+  </div>
+
+  <!-- 手牌表示 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">手牌（最大14枚）</div>
+      <button class="clear-btn" onclick="clearHand()">クリア</button>
+    </div>
+    <div class="hand-display">
+      <div class="hand-tiles" id="handDisplay">
+        <span class="hand-empty">牌を選択してください</span>
+      </div>
+    </div>
+    <div class="hint">最後に選んだ牌がアガり牌（青色）になります。クリックで削除。</div>
+  </div>
+
+  <!-- 牌選択 -->
+  <div class="section">
+    <div class="suit-section">
+      <div class="suit-label">萬子</div>
+      <div class="tiles-grid" id="manGrid"></div>
+    </div>
+    <div class="suit-section">
+      <div class="suit-label">筒子</div>
+      <div class="tiles-grid" id="pinGrid"></div>
+    </div>
+    <div class="suit-section">
+      <div class="suit-label">索子</div>
+      <div class="tiles-grid" id="souGrid"></div>
+    </div>
+    <div class="suit-section">
+      <div class="suit-label">字牌</div>
+      <div class="tiles-grid" id="jikaiGrid"></div>
+    </div>
+  </div>
+
+  <!-- コントロール -->
+  <div class="controls">
+    <div class="control-group">
+      <div class="control-label">アガり方</div>
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="ronBtn" onclick="setAgari('ron')">ロン</button>
+        <button class="toggle-btn" id="tsumoBtn" onclick="setAgari('tsumo')">ツモ</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">親 / 子</div>
+      <div class="toggle-row">
+        <button class="toggle-btn" id="oyaBtn" onclick="setOyako('oya')">親</button>
+        <button class="toggle-btn active" id="koBtn" onclick="setOyako('ko')">子</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">ドラ枚数</div>
+      <div class="number-control">
+        <button class="num-btn" onclick="changeNum('dora', -1)">−</button>
+        <span class="num-display" id="doraCount">0</span>
+        <button class="num-btn" onclick="changeNum('dora', 1)">＋</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">赤ドラ</div>
+      <div class="number-control">
+        <button class="num-btn" onclick="changeNum('akaDora', -1)">−</button>
+        <span class="num-display" id="akaDoraCount">0</span>
+        <button class="num-btn" onclick="changeNum('akaDora', 1)">＋</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">裏ドラ</div>
+      <div class="number-control">
+        <button class="num-btn" onclick="changeNum('uraDora', -1)">−</button>
+        <span class="num-display" id="uraDoraCount">0</span>
+        <button class="num-btn" onclick="changeNum('uraDora', 1)">＋</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">立直 / 一発</div>
+      <div class="toggle-row">
+        <button class="toggle-btn" id="richiBtn" onclick="toggleRichi()">リーチ</button>
+        <button class="toggle-btn" id="ippatsuBtn" onclick="toggleIppatsu()">一発</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 計算ボタン -->
+  <button class="calc-btn" onclick="calculate()">点数を計算する</button>
+
+  <!-- エラー表示 -->
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- 結果表示 -->
+  <div class="result-card" id="resultArea">
+    <div class="result-score">
+      <div class="score-label" id="resultLabel">子・ロン</div>
+      <div class="score-row">
+        <span class="score-num" id="resultScore">0</span>
+        <span class="score-unit">点</span>
+      </div>
+      <div class="fu-han-label" id="fuHanLabel"></div>
+    </div>
+    <div class="tsumo-detail" id="tsumoDetail">
+      <div class="detail-item">
+        <div class="detail-label" id="oyaPayLabel">親の支払い</div>
+        <div class="detail-value" id="oyaPay">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label" id="koPayLabel">子の支払い</div>
+        <div class="detail-value" id="koPay">-</div>
+      </div>
+    </div>
+    <div class="result-details">
+      <div class="detail-item">
+        <div class="detail-label">符</div>
+        <div class="detail-value" id="fuResult">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">翻</div>
+        <div class="detail-value" id="hanResult">-</div>
+      </div>
+    </div>
+    <div>
+      <div class="yaku-title">成立役</div>
+      <div class="yaku-tags" id="yakuTags"></div>
+    </div>
+    <!-- 記録ボタン -->
+    <button class="record-btn" id="recordBtn" onclick="recordResult()">この結果を記録する</button>
+  </div>
+
+  <!-- ===== 点数記録セクション ===== -->
+  <div class="record-section" id="recordSection">
+
+    <!-- 直近の最高役 -->
+    <div class="record-card">
+      <div class="record-card-header">
+        <span class="record-card-title">🏆 直近の最高役</span>
+        <button class="reset-btn" onclick="resetRecords()">記録をリセット</button>
+      </div>
+      <div id="bestRecordBody">
+        <span class="record-empty">まだ記録がありません</span>
+      </div>
+    </div>
+
+    <!-- 役の出現回数 -->
+    <div class="record-card">
+      <div class="record-card-header">
+        <span class="record-card-title">📊 今まで出した役の数</span>
+        <span class="record-total" id="recordTotal">0回アガり</span>
+      </div>
+      <div id="yakuStatsBody">
+        <span class="record-empty">まだ記録がありません</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
