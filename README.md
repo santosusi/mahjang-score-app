@@ -1,0 +1,1 @@
+# mahjang-score-app
