@@ -1,8 +1,8 @@
 <?php
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'mahjang_app');
-define('DB_USER', 'root');
-define('DB_PASS', 'root');
+define('DB_USER', 'your_username');  // ← ここを変更
+define('DB_PASS', 'your_password');  // ← ここを変更
 define('DB_CHARSET', 'utf8mb4');
 
 function getDB() {
